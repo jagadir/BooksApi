@@ -1,5 +1,4 @@
 ﻿using BooksApi.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BooksApi.Controllers
@@ -36,13 +35,25 @@ namespace BooksApi.Controllers
         }
 
         [HttpDelete]
-        public IActionResult Delete(Book book)
+        public IActionResult Delete(string guid)
         {
-            if(!ModelState.IsValid || book == null)
+            //check for valid guid  
+           
+            if(string.IsNullOrEmpty(guid))
+            {
+                return BadRequest();
+            }
+            var guidCheck = System.Guid.TryParse(guid, out System.Guid guidValue);
+            if (!guidCheck)
             {
                 return BadRequest();
             }
 
+            var book = _dbContext.Books.Find(guidValue);
+            if(book == null)
+            {
+                return NotFound();
+            }
             _dbContext.Books.Remove(book);
             _dbContext.SaveChanges();
             return Ok(book);
