@@ -16,13 +16,35 @@ namespace BooksApi.Controllers
 
 
         [HttpGet]
-        public IActionResult Get()
+        public IActionResult GetAll()
         {
             return Ok(_dbContext.Books);
         }
 
+        [HttpGet("{guid}")]
+        public IActionResult GetById(string guid)
+        {
+            //check for valid guid  
+            if(string.IsNullOrEmpty(guid))
+            {
+                return BadRequest();
+            }
+            var guidCheck = System.Guid.TryParse(guid, out System.Guid guidValue);
+            if (!guidCheck)
+            {
+                return BadRequest();
+            }
+
+            var book = _dbContext.Books.Find(guidValue);
+            if(book == null)
+            {
+                return NotFound();
+            }
+            return Ok(book);
+        }
+
         [HttpPost]
-        public IActionResult Post(Book book)
+        public IActionResult Create(Book book)
         {
             if(!ModelState.IsValid || book == null)
             {
@@ -60,7 +82,7 @@ namespace BooksApi.Controllers
         }
 
         [HttpPut]
-        public IActionResult Put(Book book)
+        public IActionResult Update(Book book)
         {
             if(!ModelState.IsValid || book == null)
             {
